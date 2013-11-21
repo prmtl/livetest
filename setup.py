@@ -7,7 +7,7 @@ except ImportError:
 
 
 setup(name='livetest',
-      version='0.5',
+      version='0.6',
       description='Test against a live site with an API like Paste WebTest',
       long_description=file('README.rst').read(),
       classifiers=[
