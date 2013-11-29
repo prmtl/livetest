@@ -26,7 +26,7 @@ setup(name='livetest',
       license='MIT',
       packages=find_packages(exclude=['ez_setup', 'tests']),
       include_package_data=True,
-      install_requires=['WebTest>=1.2'],
+      install_requires=['WebTest>=2.0'],
       tests_require=['nose>=0.10'],
       test_suite='nose.collector',
       zip_safe=False)
