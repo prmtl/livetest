@@ -1,7 +1,8 @@
-import webtest
 import httplib
+import webtest
 import urlparse
 from Cookie import BaseCookie, CookieError
+from six.moves import http_cookiejar
 
 conn_classes = {'http': httplib.HTTPConnection,
                 'https': httplib.HTTPSConnection}
@@ -14,12 +15,15 @@ class TestApp(webtest.TestApp):
         else:
             raise ValueError("Scheme '%s' is not supported." % scheme)
 
-    def __init__(self, host, scheme='http', relative_to=None):
+    def __init__(self, host, scheme='http', relative_to=None,
+                 extra_environ=None, use_unicode=True, cookiejar=None,
+                 parser_features=None):
         self.host = host
         self.relative_to = relative_to
         self.conn = {}
         self._load_conn(scheme)
         self.extra_environ = {}
+        self.cookiejar = cookiejar or http_cookiejar.CookieJar()
         self.reset()
 
     def _do_httplib_request(self, req):
