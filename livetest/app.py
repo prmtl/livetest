@@ -1,19 +1,20 @@
 import httplib
-import webtest
 import urlparse
-from Cookie import BaseCookie, CookieError
+from Cookie import BaseCookie
+from Cookie import CookieError
+
+import webtest
+
 from six.moves import http_cookiejar
 
-conn_classes = {'http': httplib.HTTPConnection,
-                'https': httplib.HTTPSConnection}
+
+conn_classes = {
+    'http': httplib.HTTPConnection,
+    'https': httplib.HTTPSConnection
+}
 
 
 class TestApp(webtest.TestApp):
-    def _load_conn(self, scheme):
-        if scheme in conn_classes:
-            self.conn[scheme] = conn_classes[scheme](self.host)
-        else:
-            raise ValueError("Scheme '%s' is not supported." % scheme)
 
     def __init__(self, host, scheme='http', relative_to=None,
                  extra_environ=None, use_unicode=True, cookiejar=None,
@@ -25,6 +26,12 @@ class TestApp(webtest.TestApp):
         self.extra_environ = {}
         self.cookiejar = cookiejar or http_cookiejar.CookieJar()
         self.reset()
+
+    def _load_conn(self, scheme):
+        if scheme in conn_classes:
+            self.conn[scheme] = conn_classes[scheme](self.host)
+        else:
+            raise ValueError("Scheme '%s' is not supported." % scheme)
 
     def _do_httplib_request(self, req):
         "Convert WebOb Request to httplib request."
