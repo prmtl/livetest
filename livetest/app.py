@@ -1,4 +1,3 @@
-import sys
 import webtest
 import httplib
 import urlparse
@@ -46,7 +45,6 @@ class TestApp(webtest.TestApp):
         Override webtest.TestApp's method so that we do real HTTP requests
         instead of WSGI calls.
         """
-        headers = {}
         if self.cookies:
             c = BaseCookie()
             for name, value in self.cookies.items():
