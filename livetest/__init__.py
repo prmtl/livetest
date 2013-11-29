@@ -39,4 +39,4 @@ __author__ = 'storborg@mit.edu'
 __version__ = '0.6'
 
 
-from livetest import TestApp
+from livetest.app import TestApp
