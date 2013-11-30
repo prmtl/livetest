@@ -1,9 +1,8 @@
 import httplib
 import urlparse
-from Cookie import BaseCookie
-from Cookie import CookieError
 
 import webtest
+from webtest import utils
 
 from six.moves import http_cookiejar
 
@@ -56,14 +55,11 @@ class TestApp(webtest.TestApp):
         Override webtest.TestApp's method so that we do real HTTP requests
         instead of WSGI calls.
         """
-        if self.cookies:
-            c = BaseCookie()
-            for name, value in self.cookies.items():
-                c[name] = value
-            hc = '; '.join(['='.join([m.key, m.value]) for m in c.values()])
-            req.headers['Cookie'] = hc
+        # set request cookies
+        self.cookiejar.add_cookie_header(utils._RequestCookieAdapter(req))
 
         res = self._do_httplib_request(req)
+
         # Set these attributes for consistency with webtest.
         res.request = req
         res.test_app = self
@@ -71,17 +67,13 @@ class TestApp(webtest.TestApp):
         if not expect_errors:
             self._check_status(res.status_int, res)
             self._check_errors(res)
-        res.cookies_set = {}
 
-        for header in res.headers.getall('set-cookie'):
-            try:
-                c = BaseCookie(header)
-            except CookieError, e:
-                raise CookieError(
-                    "Could not parse cookie header %r: %s" % (header, e))
-            for key, morsel in c.items():
-                self.cookies[key] = morsel.value
-                res.cookies_set[key] = morsel.value
+        # merge cookies back in
+        self.cookiejar.extract_cookies(
+            utils._ResponseCookieAdapter(res),
+            utils._RequestCookieAdapter(req)
+        )
+
         return res
 
 
