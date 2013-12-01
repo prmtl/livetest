@@ -2,10 +2,10 @@ import httplib
 import urlparse
 
 import webtest
+from livetest.lint import lint_response
 from webtest import utils
 
 from six.moves import http_cookiejar
-
 
 conn_classes = {
     'http': httplib.HTTPConnection,
@@ -63,6 +63,8 @@ class TestApp(webtest.TestApp):
         # Set these attributes for consistency with webtest.
         res.request = req
         res.test_app = self
+
+        lint_response(res)
 
         if not expect_errors:
             self._check_status(status, res)
