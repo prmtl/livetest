@@ -65,7 +65,7 @@ class TestApp(webtest.TestApp):
         res.test_app = self
 
         if not expect_errors:
-            self._check_status(res.status_int, res)
+            self._check_status(status, res)
             self._check_errors(res)
 
         # merge cookies back in
