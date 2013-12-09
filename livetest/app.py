@@ -13,7 +13,37 @@ conn_classes = {
 }
 
 
+class TestResponse(webtest.TestResponse):
+
+    def goto(self, href, method='get', **args):
+        """
+        Monkeypatch the TestResponse.goto method so that it doesn't
+        wipe out the scheme and host.
+        """
+        scheme, host, path, query, fragment = urlparse.urlsplit(href)
+        # We
+        fragment = ''
+        href = urlparse.urlunsplit((scheme, host, path, query, fragment))
+        href = urlparse.urljoin(self.request.url, href)
+        method = method.lower()
+        assert method in ('get', 'post'), (
+            'Only "get" or "post" are allowed for method (you gave %r)'
+            % method)
+        if method == 'get':
+            method = self.test_app.get
+        else:
+            method = self.test_app.post
+        return method(href, **args)
+
+
+class TestRequest(webtest.TestRequest):
+
+    ResponseClass = TestResponse
+
+
 class TestApp(webtest.TestApp):
+
+    RequestClass = TestRequest
 
     def __init__(self, host, scheme='http', relative_to=None,
                  extra_environ=None, use_unicode=True, cookiejar=None,
@@ -77,26 +107,3 @@ class TestApp(webtest.TestApp):
         )
 
         return res
-
-
-def goto(self, href, method='get', **args):
-    """
-    Monkeypatch the TestResponse.goto method so that it doesn't wipe out the
-    scheme and host.
-    """
-    scheme, host, path, query, fragment = urlparse.urlsplit(href)
-    # We
-    fragment = ''
-    href = urlparse.urlunsplit((scheme, host, path, query, fragment))
-    href = urlparse.urljoin(self.request.url, href)
-    method = method.lower()
-    assert method in ('get', 'post'), (
-        'Only "get" or "post" are allowed for method (you gave %r)'
-        % method)
-    if method == 'get':
-        method = self.test_app.get
-    else:
-        method = self.test_app.post
-    return method(href, **args)
-
-webtest.TestResponse.goto = goto
